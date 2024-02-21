@@ -13,30 +13,36 @@ import os
 from tqdm import tqdm
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Detect bboxes in an input file or folder (PDFs or image).")
-    parser.add_argument("input_path", type=str, help="Path to pdf or image file or folder to detect bboxes in.")
-    parser.add_argument("--results_dir", type=str, help="Path to JSON file with OCR results.", default=os.path.join(settings.RESULT_DIR, "surya"))
-    parser.add_argument("--max", type=int, help="Maximum number of pages to process.", default=None)
-    parser.add_argument("--images", action="store_true", help="Save images of detected bboxes.", default=False)
-    parser.add_argument("--debug", action="store_true", help="Run in debug mode.", default=False)
-    args = parser.parse_args()
+def detect(
+        input_path: str,
+        results_dir: str,
+        max_pages: int = None,
+        images: bool = False,
+        debug: bool = False
+    ):
+    # parser = argparse.ArgumentParser(description="Detect bboxes in an input file or folder (PDFs or image).")
+    # parser.add_argument("input_path", type=str, help="Path to pdf or image file or folder to detect bboxes in.")
+    # parser.add_argument("--results_dir", type=str, help="Path to JSON file with OCR results.", default=os.path.join(settings.RESULT_DIR, "surya"))
+    # parser.add_argument("--max", type=int, help="Maximum number of pages to process.", default=None)
+    # parser.add_argument("--images", action="store_true", help="Save images of detected bboxes.", default=False)
+    # parser.add_argument("--debug", action="store_true", help="Run in debug mode.", default=False)
+    # args = parser.parse_args()
 
     model = load_model()
     processor = load_processor()
 
-    if os.path.isdir(args.input_path):
-        images, names = load_from_folder(args.input_path, args.max)
-        folder_name = os.path.basename(args.input_path)
+    if os.path.isdir(input_path):
+        images, names = load_from_folder(input_path, max_pages)
+        folder_name = os.path.basename(input_path)
     else:
-        images, names = load_from_file(args.input_path, args.max)
-        folder_name = os.path.basename(args.input_path).split(".")[0]
+        images, names = load_from_file(input_path, max_pages)
+        folder_name = os.path.basename(input_path).split(".")[0]
 
     predictions = batch_detection(images, model, processor)
-    result_path = os.path.join(args.results_dir, folder_name)
+    result_path = os.path.join(results_dir, folder_name)
     os.makedirs(result_path, exist_ok=True)
 
-    if args.images:
+    if images:
         for idx, (image, pred, name) in enumerate(zip(images, predictions, names)):
             polygons = [p.polygon for p in pred.bboxes]
             bbox_image = draw_polys_on_image(polygons, copy.deepcopy(image))
@@ -45,7 +51,7 @@ def main():
             column_image = draw_lines_on_image(pred.vertical_lines, copy.deepcopy(image))
             column_image.save(os.path.join(result_path, f"{name}_{idx}_column.png"))
 
-            if args.debug:
+            if debug:
                 heatmap = pred.heatmap
                 heatmap.save(os.path.join(result_path, f"{name}_{idx}_heat.png"))
 
@@ -58,15 +64,7 @@ def main():
         out_pred["page"] = len(predictions_by_page[name]) + 1
         predictions_by_page[name].append(out_pred)
 
-    with open(os.path.join(result_path, "results.json"), "w+") as f:
-        json.dump(predictions_by_page, f, ensure_ascii=False)
-
-    print(f"Wrote results to {result_path}")
-
-
-if __name__ == "__main__":
-    main()
-
+    return predictions_by_page
 
 
 
