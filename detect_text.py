@@ -13,9 +13,9 @@ import os
 from tqdm import tqdm
 
 
-def detect(
+def surya_detect(
         input_path: str,
-        results_dir: str,
+        results_dir: str = None,
         max_pages: int = None,
         images: bool = False,
         debug: bool = False
@@ -33,30 +33,30 @@ def detect(
 
     if os.path.isdir(input_path):
         images, names = load_from_folder(input_path, max_pages)
-        folder_name = os.path.basename(input_path)
+        # folder_name = os.path.basename(input_path)
     else:
         images, names = load_from_file(input_path, max_pages)
-        folder_name = os.path.basename(input_path).split(".")[0]
+        # folder_name = os.path.basename(input_path).split(".")[0]
 
     predictions = batch_detection(images, model, processor)
-    result_path = os.path.join(results_dir, folder_name)
-    os.makedirs(result_path, exist_ok=True)
+    # result_path = os.path.join(results_dir, folder_name)
+    # os.makedirs(result_path, exist_ok=True)
 
-    if images:
-        for idx, (image, pred, name) in enumerate(zip(images, predictions, names)):
-            polygons = [p.polygon for p in pred.bboxes]
-            bbox_image = draw_polys_on_image(polygons, copy.deepcopy(image))
-            bbox_image.save(os.path.join(result_path, f"{name}_{idx}_bbox.png"))
+    # if images:
+    #     for idx, (image, pred, name) in enumerate(zip(images, predictions, names)):
+    #         polygons = [p.polygon for p in pred.bboxes]
+    #         bbox_image = draw_polys_on_image(polygons, copy.deepcopy(image))
+    #         bbox_image.save(os.path.join(result_path, f"{name}_{idx}_bbox.png"))
 
-            column_image = draw_lines_on_image(pred.vertical_lines, copy.deepcopy(image))
-            column_image.save(os.path.join(result_path, f"{name}_{idx}_column.png"))
+    #         column_image = draw_lines_on_image(pred.vertical_lines, copy.deepcopy(image))
+    #         column_image.save(os.path.join(result_path, f"{name}_{idx}_column.png"))
 
-            if debug:
-                heatmap = pred.heatmap
-                heatmap.save(os.path.join(result_path, f"{name}_{idx}_heat.png"))
+    #         if debug:
+    #             heatmap = pred.heatmap
+    #             heatmap.save(os.path.join(result_path, f"{name}_{idx}_heat.png"))
 
-                affinity_map = pred.affinity_map
-                affinity_map.save(os.path.join(result_path, f"{name}_{idx}_affinity.png"))
+    #             affinity_map = pred.affinity_map
+    #             affinity_map.save(os.path.join(result_path, f"{name}_{idx}_affinity.png"))
 
     predictions_by_page = defaultdict(list)
     for idx, (pred, name, image) in enumerate(zip(predictions, names, images)):
