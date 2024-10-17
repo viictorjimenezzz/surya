@@ -1,17 +1,20 @@
+import os
 import argparse
 import json
+import time
 from collections import defaultdict
+
+import torch
 
 from surya.input.langs import replace_lang_with_code, get_unique_langs
 from surya.input.load import load_from_folder, load_from_file, load_lang_file
-from surya.model.detection.segformer import load_model as load_detection_model, load_processor as load_detection_processor
+from surya.model.detection.model import load_model as load_detection_model, load_processor as load_detection_processor
 from surya.model.recognition.model import load_model as load_recognition_model
 from surya.model.recognition.processor import load_processor as load_recognition_processor
 from surya.model.recognition.tokenizer import _tokenize
 from surya.ocr import run_ocr
 from surya.postprocessing.text import draw_text_on_image
 from surya.settings import settings
-import os
 
 
 def pdf_to_text(
@@ -48,23 +51,29 @@ def pdf_to_text(
         for lang in langs:
             replace_lang_with_code(lang)
         image_langs = langs
-    else:
+    elif args.langs:
         # We got our language settings from the input
         langs = langs.split(",")
         replace_lang_with_code(langs)
         image_langs = [langs] * len(images)
+    else:
+        image_langs = [None] * len(images)
 
     det_processor = load_detection_processor()
     det_model = load_detection_model()
 
-    _, lang_tokens = _tokenize("", get_unique_langs(image_langs))
-    rec_model = load_recognition_model(langs=lang_tokens) # Prune model moe layer to only include languages we need
+    rec_model = load_recognition_model()
     rec_processor = load_recognition_processor()
 
     # result_path = os.path.join(results_dir, folder_name)
     # os.makedirs(result_path, exist_ok=True)
 
-    predictions_by_image = run_ocr(images, image_langs, det_model, det_processor, rec_model, rec_processor)
+    start = time.time()
+    predictions_by_image = run_ocr(images, image_langs, det_model, det_processor, rec_model, rec_processor, highres_images=highres_images)
+    if args.debug:
+        print(f"OCR took {time.time() - start:.2f} seconds")
+        max_chars = max([len(l.text) for p in predictions_by_image for l in p.text_lines])
+        print(f"Max chars: {max_chars}")
 
     # if images:
     #     for idx, (name, image, pred) in enumerate(zip(names, images, predictions_by_image)):

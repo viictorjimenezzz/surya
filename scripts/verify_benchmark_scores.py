@@ -2,6 +2,13 @@ import json
 import argparse
 
 
+def verify_layout(data):
+    scores = data["metrics"]
+    for layout_type, metrics in scores.items():
+        if metrics["precision"] <= 0.6 or metrics["recall"] <= 0.6:
+            raise ValueError("Scores do not meet the required threshold")
+
+
 def verify_det(data):
     scores = data["metrics"]["surya"]
     if scores["precision"] <= 0.9 or scores["recall"] <= 0.9:
@@ -14,6 +21,20 @@ def verify_rec(data):
         raise ValueError("Scores do not meet the required threshold")
 
 
+def verify_order(data):
+    score = data["mean_accuracy"]
+    if score < 0.75:
+        raise ValueError("Scores do not meet the required threshold")
+
+
+def verify_table_rec(data):
+    row_score = data["surya"]["mean_row_iou"]
+    col_score = data["surya"]["mean_col_iou"]
+
+    if row_score < 0.75 or col_score < 0.75:
+        raise ValueError("Scores do not meet the required threshold")
+
+
 def verify_scores(file_path, bench_type):
     with open(file_path, 'r') as file:
         data = json.load(file)
@@ -22,6 +43,12 @@ def verify_scores(file_path, bench_type):
         verify_det(data)
     elif bench_type == "recognition":
         verify_rec(data)
+    elif bench_type == "layout":
+        verify_layout(data)
+    elif bench_type == "ordering":
+        verify_order(data)
+    elif bench_type == "table_recognition":
+        verify_table_rec(data)
     else:
         raise ValueError("Invalid benchmark type")
 

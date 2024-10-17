@@ -1,4 +1,5 @@
 CODE_TO_LANGUAGE = {
+    "_math": "Math",
     'af': 'Afrikaans',
     'am': 'Amharic',
     'ar': 'Arabic',
@@ -91,7 +92,7 @@ CODE_TO_LANGUAGE = {
     'vi': 'Vietnamese',
     'xh': 'Xhosa',
     'yi': 'Yiddish',
-    'zh': 'Chinese'
+    'zh': 'Chinese',
 }
 
 LANGUAGE_TO_CODE = {v: k for k, v in CODE_TO_LANGUAGE.items()}

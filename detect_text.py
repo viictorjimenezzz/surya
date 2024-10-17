@@ -1,11 +1,12 @@
 import argparse
 import copy
 import json
+import time
 from collections import defaultdict
 
 from surya.input.load import load_from_folder, load_from_file
-from surya.model.detection.segformer import load_model, load_processor
-from surya.detection import batch_detection
+from surya.model.detection.model import load_model, load_processor
+from surya.detection import batch_text_detection
 from surya.postprocessing.affinity import draw_lines_on_image
 from surya.postprocessing.heatmap import draw_polys_on_image
 from surya.settings import settings
@@ -28,8 +29,9 @@ def surya_detect(
     # parser.add_argument("--debug", action="store_true", help="Run in debug mode.", default=False)
     # args = parser.parse_args()
 
-    model = load_model()
-    processor = load_processor()
+    checkpoint = settings.DETECTOR_MODEL_CHECKPOINT
+    model = load_model(checkpoint=checkpoint)
+    processor = load_processor(checkpoint=checkpoint)
 
     if os.path.isdir(input_path):
         images, names = load_from_folder(input_path, max_pages)

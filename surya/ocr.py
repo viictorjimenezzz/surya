@@ -1,20 +1,21 @@
-from collections import defaultdict
+from copy import deepcopy
 from typing import List
-from tqdm import tqdm
-
-import torch
 from PIL import Image
 
-from surya.detection import batch_detection
-from surya.input.processing import slice_polys_from_image, slice_bboxes_from_image
-from surya.postprocessing.text import truncate_repetitions, sort_text_lines
+from surya.detection import batch_text_detection
+from surya.input.processing import slice_polys_from_image, slice_bboxes_from_image, convert_if_not_rgb
+from surya.postprocessing.text import sort_text_lines
 from surya.recognition import batch_recognition
 from surya.schema import TextLine, OCRResult
 
 
-def run_recognition(images: List[Image.Image], langs: List[List[str]], rec_model, rec_processor, bboxes: List[List[List[int]]] = None, polygons: List[List[List[List[int]]]] = None) -> List[OCRResult]:
+def run_recognition(images: List[Image.Image], langs: List[List[str] | None], rec_model, rec_processor, bboxes: List[List[List[int]]] = None, polygons: List[List[List[List[int]]]] = None, batch_size=None) -> List[OCRResult]:
     # Polygons need to be in corner format - [[x1, y1], [x2, y2], [x3, y3], [x4, y4]], bboxes in [x1, y1, x2, y2] format
     assert bboxes is not None or polygons is not None
+    assert len(images) == len(langs), "You need to pass in one list of languages for each image"
+
+    images = convert_if_not_rgb(images)
+
     slice_map = []
     all_slices = []
     all_langs = []
@@ -25,9 +26,9 @@ def run_recognition(images: List[Image.Image], langs: List[List[str]], rec_model
             slices = slice_bboxes_from_image(image, bboxes[idx])
         slice_map.append(len(slices))
         all_slices.extend(slices)
-        all_langs.extend([lang] * len(slices))
+        all_langs.extend([deepcopy(lang)] * len(slices))
 
-    rec_predictions = batch_recognition(all_slices, all_langs, rec_model, rec_processor)
+    rec_predictions, _ = batch_recognition(all_slices, all_langs, rec_model, rec_processor, batch_size=batch_size)
 
     predictions_by_image = []
     slice_start = 0
@@ -59,40 +60,47 @@ def run_recognition(images: List[Image.Image], langs: List[List[str]], rec_model
     return predictions_by_image
 
 
-def run_ocr(images: List[Image.Image], langs: List[List[str]], det_model, det_processor, rec_model, rec_processor) -> List[OCRResult]:
-    det_predictions = batch_detection(images, det_model, det_processor)
-    if det_model.device == "cuda":
-        torch.cuda.empty_cache() # Empty cache from first model run
+def run_ocr(images: List[Image.Image], langs: List[List[str] | None], det_model, det_processor, rec_model, rec_processor, batch_size=None, highres_images: List[Image.Image] | None = None) -> List[OCRResult]:
+    images = convert_if_not_rgb(images)
+    highres_images = convert_if_not_rgb(highres_images) if highres_images is not None else [None] * len(images)
+    det_predictions = batch_text_detection(images, det_model, det_processor)
 
-    slice_map = []
     all_slices = []
+    slice_map = []
     all_langs = []
-    for idx, (image, det_pred, lang) in enumerate(zip(images, det_predictions, langs)):
-        polygons = [p.polygon for p in det_pred.bboxes]
-        slices = slice_polys_from_image(image, polygons)
-        slice_map.append(len(slices))
-        all_slices.extend(slices)
-        all_langs.extend([lang] * len(slices))
 
-    rec_predictions = batch_recognition(all_slices, all_langs, rec_model, rec_processor)
+    for idx, (det_pred, image, highres_image, lang) in enumerate(zip(det_predictions, images, highres_images, langs)):
+        polygons = [p.polygon for p in det_pred.bboxes]
+        if highres_image:
+            width_scaler = highres_image.size[0] / image.size[0]
+            height_scaler = highres_image.size[1] / image.size[1]
+            scaled_polygons = [[[int(p[0] * width_scaler), int(p[1] * height_scaler)] for p in polygon] for polygon in polygons]
+            slices = slice_polys_from_image(highres_image, scaled_polygons)
+        else:
+            slices = slice_polys_from_image(image, polygons)
+        slice_map.append(len(slices))
+        all_langs.extend([lang] * len(slices))
+        all_slices.extend(slices)
+
+    rec_predictions, confidence_scores = batch_recognition(all_slices, all_langs, rec_model, rec_processor, batch_size=batch_size)
 
     predictions_by_image = []
     slice_start = 0
     for idx, (image, det_pred, lang) in enumerate(zip(images, det_predictions, langs)):
         slice_end = slice_start + slice_map[idx]
         image_lines = rec_predictions[slice_start:slice_end]
+        line_confidences = confidence_scores[slice_start:slice_end]
         slice_start = slice_end
 
         assert len(image_lines) == len(det_pred.bboxes)
 
-        # Remove repeated characters
-        image_lines = [truncate_repetitions(l) for l in image_lines]
         lines = []
-        for text_line, bbox in zip(image_lines, det_pred.bboxes):
+        for text_line, confidence, bbox in zip(image_lines, line_confidences, det_pred.bboxes):
             lines.append(TextLine(
                 text=text_line,
                 polygon=bbox.polygon,
-                bbox=bbox.bbox
+                bbox=bbox.bbox,
+                confidence=confidence
             ))
 
         lines = sort_text_lines(lines)

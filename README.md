@@ -2,15 +2,26 @@
 
 Surya is a document OCR toolkit that does:
 
-- Accurate OCR in 90+ languages
+- OCR in 90+ languages that benchmarks favorably vs cloud services
 - Line-level text detection in any language
-- Table and chart detection (coming soon)
+- Layout analysis (table, image, header, etc detection)
+- Reading order detection
+- Table recognition (detecting rows/columns)
 
 It works on a range of documents (see [usage](#usage) and [benchmarks](#benchmarks) for more details).
 
+
 |                            Detection                             |                                   OCR                                   |
 |:----------------------------------------------------------------:|:-----------------------------------------------------------------------:|
-|  ![New York Times Article Detection](static/images/excerpt.png)  |  ![New York Times Article Recognition](static/images/excerpt_text.png)  |
+|  <img src="static/images/excerpt.png" width="500px"/>  |  <img src="static/images/excerpt_text.png" width="500px"/> |
+
+|                               Layout                               |                               Reading Order                                |
+|:------------------------------------------------------------------:|:--------------------------------------------------------------------------:|
+| <img src="static/images/excerpt_layout.png" width="500px"/> | <img src="static/images/excerpt_reading.jpg" width="500px"/> |
+
+|                       Table Recognition                       |     |
+|:-------------------------------------------------------------:|:----------------:|
+| <img src="static/images/scanned_tablerec.png" width="500px"/> | <img width="500px"/> |
 
 
 Surya is named for the [Hindu sun god](https://en.wikipedia.org/wiki/Surya), who has universal vision.
@@ -21,57 +32,71 @@ Surya is named for the [Hindu sun god](https://en.wikipedia.org/wiki/Surya), who
 
 ## Examples
 
-| Name             |           Text Detection            |                                      OCR |
-|------------------|:-----------------------------------:|-----------------------------------------:|
-| Japanese         | [Image](static/images/japanese.jpg) | [Image](static/images/japanese_text.jpg) |
-| Chinese          | [Image](static/images/chinese.jpg)  |  [Image](static/images/chinese_text.jpg) |
-| Hindi            |  [Image](static/images/hindi.jpg)   |    [Image](static/images/hindi_text.jpg) |
-| Arabic           |  [Image](static/images/arabic.jpg)  |   [Image](static/images/arabic_text.jpg) |
-| Chinese + Hindi  | [Image](static/images/chi_hind.jpg) | [Image](static/images/chi_hind_text.jpg) |
-| Presentation     |   [Image](static/images/pres.png)   |     [Image](static/images/pres_text.jpg) |
-| Scientific Paper |  [Image](static/images/paper.jpg)   |    [Image](static/images/paper_text.jpg) |
-| Scanned Document | [Image](static/images/scanned.png)  |  [Image](static/images/scanned_text.jpg) |
-| New York Times   |   [Image](static/images/nyt.jpg)    |      [Image](static/images/nyt_text.jpg) |
-| Scanned Form     |  [Image](static/images/funsd.png)   |    [Image](static/images/funsd_text.jpg) |
-| Textbook         | [Image](static/images/textbook.jpg) | [Image](static/images/textbook_text.jpg) |
+| Name             |              Detection              |                                      OCR |                                     Layout |                                       Order |                                    Table Rec |
+|------------------|:-----------------------------------:|-----------------------------------------:|-------------------------------------------:|--------------------------------------------:|---------------------------------------------:|
+| Japanese         | [Image](static/images/japanese.jpg) | [Image](static/images/japanese_text.jpg) | [Image](static/images/japanese_layout.jpg) | [Image](static/images/japanese_reading.jpg) | [Image](static/images/japanese_tablerec.png) |
+| Chinese          | [Image](static/images/chinese.jpg)  |  [Image](static/images/chinese_text.jpg) |  [Image](static/images/chinese_layout.jpg) |  [Image](static/images/chinese_reading.jpg) |                                              |
+| Hindi            |  [Image](static/images/hindi.jpg)   |    [Image](static/images/hindi_text.jpg) |    [Image](static/images/hindi_layout.jpg) |    [Image](static/images/hindi_reading.jpg) |                                              |
+| Arabic           |  [Image](static/images/arabic.jpg)  |   [Image](static/images/arabic_text.jpg) |   [Image](static/images/arabic_layout.jpg) |   [Image](static/images/arabic_reading.jpg) |                                              |
+| Chinese + Hindi  | [Image](static/images/chi_hind.jpg) | [Image](static/images/chi_hind_text.jpg) | [Image](static/images/chi_hind_layout.jpg) | [Image](static/images/chi_hind_reading.jpg) |                                              |
+| Presentation     |   [Image](static/images/pres.png)   |     [Image](static/images/pres_text.jpg) |     [Image](static/images/pres_layout.jpg) |     [Image](static/images/pres_reading.jpg) |     [Image](static/images/pres_tablerec.png) |
+| Scientific Paper |  [Image](static/images/paper.jpg)   |    [Image](static/images/paper_text.jpg) |    [Image](static/images/paper_layout.jpg) |    [Image](static/images/paper_reading.jpg) |    [Image](static/images/paper_tablerec.png) |
+| Scanned Document | [Image](static/images/scanned.png)  |  [Image](static/images/scanned_text.jpg) |  [Image](static/images/scanned_layout.jpg) |  [Image](static/images/scanned_reading.jpg) |  [Image](static/images/scanned_tablerec.png) |
+| New York Times   |   [Image](static/images/nyt.jpg)    |      [Image](static/images/nyt_text.jpg) |      [Image](static/images/nyt_layout.jpg) |        [Image](static/images/nyt_order.jpg) |                                              |
+| Scanned Form     |  [Image](static/images/funsd.png)   |    [Image](static/images/funsd_text.jpg) |    [Image](static/images/funsd_layout.jpg) |    [Image](static/images/funsd_reading.jpg) | [Image](static/images/scanned_tablerec2.png) |
+| Textbook         | [Image](static/images/textbook.jpg) | [Image](static/images/textbook_text.jpg) | [Image](static/images/textbook_layout.jpg) |   [Image](static/images/textbook_order.jpg) |                                              |
+
+# Hosted API
+
+There is a hosted API for all surya models available [here](https://www.datalab.to/):
+
+- Works with PDF, images, word docs, and powerpoints
+- Consistent speed, with no latency spikes
+- High reliability and uptime
+
+# Commercial usage
+
+I want surya to be as widely accessible as possible, while still funding my development/training costs. Research and personal usage is always okay, but there are some restrictions on commercial usage.
+
+The weights for the models are licensed `cc-by-nc-sa-4.0`, but I will waive that for any organization under $5M USD in gross revenue in the most recent 12-month period AND under $5M in lifetime VC/angel funding raised. You also must not be competitive with the [Datalab API](https://www.datalab.to/).  If you want to remove the GPL license requirements (dual-license) and/or use the weights commercially over the revenue limit, check out the options [here](https://www.datalab.to).
 
 # Installation
 
-You'll need python 3.9+ and PyTorch. You may need to install the CPU version of torch first if you're not using a Mac or a GPU machine.  See [here](https://pytorch.org/get-started/locally/) for more details.
+You'll need python 3.10+ and PyTorch. You may need to install the CPU version of torch first if you're not using a Mac or a GPU machine.  See [here](https://pytorch.org/get-started/locally/) for more details.
 
 Install with:
 
-```
+```shell
 pip install surya-ocr
 ```
 
-Model weights will automatically download the first time you run surya.  Note that this does not work with the latest version of transformers `4.37+` [yet](https://github.com/huggingface/transformers/issues/28846#issuecomment-1926109135), so you will need to keep `4.36.2`, which is installed with surya.
+Model weights will automatically download the first time you run surya.
 
 # Usage
 
 - Inspect the settings in `surya/settings.py`.  You can override any settings with environment variables.
-- Your torch device will be automatically detected, but you can override this.  For example, `TORCH_DEVICE=cuda`. For text detection, the `mps` device has a bug (on the [Apple side](https://github.com/pytorch/pytorch/issues/84936)) that may prevent it from working properly.
+- Your torch device will be automatically detected, but you can override this.  For example, `TORCH_DEVICE=cuda`.
 
 ## Interactive App
 
 I've included a streamlit app that lets you interactively try Surya on images or PDF files.  Run it with:
 
-```
+```shell
 pip install streamlit
 surya_gui
 ```
 
 ## OCR (text recognition)
 
-You can OCR text in an image, pdf, or folder of images/pdfs with the following command.  This will write out a json file with the detected text and bboxes, and optionally save images of the reconstructed page.
+This command will write out a json file with the detected text and bboxes:
 
-```
-surya_ocr DATA_PATH --images --langs hi,en
+```shell
+surya_ocr DATA_PATH
 ```
 
 - `DATA_PATH` can be an image, pdf, or folder of images/pdfs
-- `--langs` specifies the language(s) to use for OCR.  You can comma separate multiple languages (I don't recommend using more than `4`). Use the language name or two-letter ISO code from [here](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes).  Surya supports the 90+ languages found in `surya/languages.py`.
-- `--lang_file` if you want to use a different language for different PDFs/images, you can specify languages here.  The format is a JSON dict with the keys being filenames and the values as a list, like `{"file1.pdf": ["en", "hi"], "file2.pdf": ["en"]}`.
+- `--langs` is an optional (but recommended) argument that specifies the language(s) to use for OCR.  You can comma separate multiple languages. Use the language name or two-letter ISO code from [here](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes).  Surya supports the 90+ languages found in `surya/languages.py`.
+- `--lang_file` if you want to use a different language for different PDFs/images, you can optionally specify languages in a file.  The format is a JSON dict with the keys being filenames and the values as a list, like `{"file1.pdf": ["en", "hi"], "file2.pdf": ["en"]}`.
 - `--images` will save images of the pages and detected text lines (optional)
 - `--results_dir` specifies the directory to save results to instead of the default
 - `--max` specifies the maximum number of pages to process if you don't want to process everything
@@ -81,6 +106,7 @@ The `results.json` file will contain a json dictionary where the keys are the in
 
 - `text_lines` - the detected text and bounding boxes for each line
   - `text` - the text in the line
+  - `confidence` - the confidence of the model in the detected text (0-1)
   - `polygon` - the polygon for the text line in (x1, y1), (x2, y2), (x3, y3), (x4, y4) format.  The points are in clockwise order from the top left.
   - `bbox` - the axis-aligned rectangle for the text line in (x1, y1, x2, y2) format.  (x1, y1) is the top left corner, and (x2, y2) is the bottom right corner.
 - `languages` - the languages specified for the page
@@ -89,31 +115,41 @@ The `results.json` file will contain a json dictionary where the keys are the in
 
 **Performance tips**
 
-Setting the `RECOGNITION_BATCH_SIZE` env var properly will make a big difference when using a GPU.  Each batch item will use `50MB` of VRAM, so very high batch sizes are possible.  The default is a batch size `256`, which will use about 12.8GB of VRAM.  Depending on your CPU core count, it may help, too - the default CPU batch size is `32`.
+Setting the `RECOGNITION_BATCH_SIZE` env var properly will make a big difference when using a GPU.  Each batch item will use `40MB` of VRAM, so very high batch sizes are possible.  The default is a batch size `512`, which will use about 20GB of VRAM.  Depending on your CPU core count, it may help, too - the default CPU batch size is `32`.
 
 ### From python
 
-```
+```python
 from PIL import Image
 from surya.ocr import run_ocr
-from surya.model.detection.segformer import load_model as load_det_model, load_processor as load_det_processor
+from surya.model.detection.model import load_model as load_det_model, load_processor as load_det_processor
 from surya.model.recognition.model import load_model as load_rec_model
 from surya.model.recognition.processor import load_processor as load_rec_processor
 
 image = Image.open(IMAGE_PATH)
-langs = ["en"] # Replace with your languages
+langs = ["en"] # Replace with your languages - optional but recommended
 det_processor, det_model = load_det_processor(), load_det_model()
 rec_model, rec_processor = load_rec_model(), load_rec_processor()
 
 predictions = run_ocr([image], [langs], det_model, det_processor, rec_model, rec_processor)
 ```
 
+### Compilation
+
+The OCR model can be compiled to get an ~15% speedup in total inference time.  The first run will be slow while it compiles, though. First set `RECOGNITION_STATIC_CACHE=true`, then:
+
+```python
+import torch
+
+rec_model.decoder.model = torch.compile(rec_model.decoder.model)
+```
+
 ## Text line detection
 
-You can detect text lines in an image, pdf, or folder of images/pdfs with the following command.  This will write out a json file with the detected bboxes.
+This command will write out a json file with the detected bboxes.
 
-```
-surya_detect DATA_PATH --images
+```shell
+surya_detect DATA_PATH
 ```
 
 - `DATA_PATH` can be an image, pdf, or folder of images/pdfs
@@ -126,38 +162,164 @@ The `results.json` file will contain a json dictionary where the keys are the in
 - `bboxes` - detected bounding boxes for text
   - `bbox` - the axis-aligned rectangle for the text line in (x1, y1, x2, y2) format.  (x1, y1) is the top left corner, and (x2, y2) is the bottom right corner.
   - `polygon` - the polygon for the text line in (x1, y1), (x2, y2), (x3, y3), (x4, y4) format.  The points are in clockwise order from the top left.
+  - `confidence` - the confidence of the model in the detected text (0-1)
 - `vertical_lines` - vertical lines detected in the document
-  - `bbox` - the axis-aligned line coordinates.
-- `horizontal_lines` - horizontal lines detected in the document
   - `bbox` - the axis-aligned line coordinates.
 - `page` - the page number in the file
 - `image_bbox` - the bbox for the image in (x1, y1, x2, y2) format.  (x1, y1) is the top left corner, and (x2, y2) is the bottom right corner.  All line bboxes will be contained within this bbox.
 
 **Performance tips**
 
-Setting the `DETECTOR_BATCH_SIZE` env var properly will make a big difference when using a GPU.  Each batch item will use `280MB` of VRAM, so very high batch sizes are possible.  The default is a batch size `32`, which will use about 9GB of VRAM.  Depending on your CPU core count, it might help, too - the default CPU batch size is `2`.
+Setting the `DETECTOR_BATCH_SIZE` env var properly will make a big difference when using a GPU.  Each batch item will use `440MB` of VRAM, so very high batch sizes are possible.  The default is a batch size `36`, which will use about 16GB of VRAM.  Depending on your CPU core count, it might help, too - the default CPU batch size is `6`.
 
 ### From python
 
-```
+```python
 from PIL import Image
-from surya.detection import batch_detection
-from surya.model.segformer import load_model, load_processor
+from surya.detection import batch_text_detection
+from surya.model.detection.model import load_model, load_processor
 
 image = Image.open(IMAGE_PATH)
 model, processor = load_model(), load_processor()
 
 # predictions is a list of dicts, one per image
-predictions = batch_detection([image], model, processor)
+predictions = batch_text_detection([image], model, processor)
 ```
+
+## Layout analysis
+
+This command will write out a json file with the detected layout.
+
+```shell
+surya_layout DATA_PATH
+```
+
+- `DATA_PATH` can be an image, pdf, or folder of images/pdfs
+- `--images` will save images of the pages and detected text lines (optional)
+- `--max` specifies the maximum number of pages to process if you don't want to process everything
+- `--results_dir` specifies the directory to save results to instead of the default
+
+The `results.json` file will contain a json dictionary where the keys are the input filenames without extensions.  Each value will be a list of dictionaries, one per page of the input document.  Each page dictionary contains:
+
+- `bboxes` - detected bounding boxes for text
+  - `bbox` - the axis-aligned rectangle for the text line in (x1, y1, x2, y2) format.  (x1, y1) is the top left corner, and (x2, y2) is the bottom right corner.
+  - `polygon` - the polygon for the text line in (x1, y1), (x2, y2), (x3, y3), (x4, y4) format.  The points are in clockwise order from the top left.
+  - `confidence` - the confidence of the model in the detected text (0-1).  This is currently not very reliable.
+  - `label` - the label for the bbox.  One of `Caption`, `Footnote`, `Formula`, `List-item`, `Page-footer`, `Page-header`, `Picture`, `Figure`, `Section-header`, `Table`, `Text`, `Title`.
+- `page` - the page number in the file
+- `image_bbox` - the bbox for the image in (x1, y1, x2, y2) format.  (x1, y1) is the top left corner, and (x2, y2) is the bottom right corner.  All line bboxes will be contained within this bbox.
+
+**Performance tips**
+
+Setting the `DETECTOR_BATCH_SIZE` env var properly will make a big difference when using a GPU.  Each batch item will use `400MB` of VRAM, so very high batch sizes are possible.  The default is a batch size `36`, which will use about 16GB of VRAM.  Depending on your CPU core count, it might help, too - the default CPU batch size is `6`.
+
+### From python
+
+```python
+from PIL import Image
+from surya.detection import batch_text_detection
+from surya.layout import batch_layout_detection
+from surya.model.detection.model import load_model, load_processor
+from surya.settings import settings
+
+image = Image.open(IMAGE_PATH)
+model = load_model(checkpoint=settings.LAYOUT_MODEL_CHECKPOINT)
+processor = load_processor(checkpoint=settings.LAYOUT_MODEL_CHECKPOINT)
+det_model = load_model()
+det_processor = load_processor()
+
+# layout_predictions is a list of dicts, one per image
+line_predictions = batch_text_detection([image], det_model, det_processor)
+layout_predictions = batch_layout_detection([image], model, processor, line_predictions)
+```
+
+## Reading order
+
+This command will write out a json file with the detected reading order and layout.
+
+```shell
+surya_order DATA_PATH
+```
+
+- `DATA_PATH` can be an image, pdf, or folder of images/pdfs
+- `--images` will save images of the pages and detected text lines (optional)
+- `--max` specifies the maximum number of pages to process if you don't want to process everything
+- `--results_dir` specifies the directory to save results to instead of the default
+
+The `results.json` file will contain a json dictionary where the keys are the input filenames without extensions.  Each value will be a list of dictionaries, one per page of the input document.  Each page dictionary contains:
+
+- `bboxes` - detected bounding boxes for text
+  - `bbox` - the axis-aligned rectangle for the text line in (x1, y1, x2, y2) format.  (x1, y1) is the top left corner, and (x2, y2) is the bottom right corner.
+  - `position` - the position in the reading order of the bbox, starting from 0.
+  - `label` - the label for the bbox.  See the layout section of the documentation for a list of potential labels.
+- `page` - the page number in the file
+- `image_bbox` - the bbox for the image in (x1, y1, x2, y2) format.  (x1, y1) is the top left corner, and (x2, y2) is the bottom right corner.  All line bboxes will be contained within this bbox.
+
+**Performance tips**
+
+Setting the `ORDER_BATCH_SIZE` env var properly will make a big difference when using a GPU.  Each batch item will use `360MB` of VRAM, so very high batch sizes are possible.  The default is a batch size `32`, which will use about 11GB of VRAM.  Depending on your CPU core count, it might help, too - the default CPU batch size is `4`.
+
+### From python
+
+```python
+from PIL import Image
+from surya.ordering import batch_ordering
+from surya.model.ordering.processor import load_processor
+from surya.model.ordering.model import load_model
+
+image = Image.open(IMAGE_PATH)
+# bboxes should be a list of lists with layout bboxes for the image in [x1,y1,x2,y2] format
+# You can get this from the layout model, see above for usage
+bboxes = [bbox1, bbox2, ...]
+
+model = load_model()
+processor = load_processor()
+
+# order_predictions will be a list of dicts, one per image
+order_predictions = batch_ordering([image], [bboxes], model, processor)
+```
+
+## Table Recognition
+
+This command will write out a json file with the detected table cells and row/column ids, along with row/column bounding boxes.  If you want to get a formatted markdown table, check out the [tabled](https://www.github.com/VikParuchuri/tabled) repo.
+
+```shell
+surya_table DATA_PATH
+```
+
+- `DATA_PATH` can be an image, pdf, or folder of images/pdfs
+- `--images` will save images of the pages and detected table cells + rows and columns (optional)
+- `--max` specifies the maximum number of pages to process if you don't want to process everything
+- `--results_dir` specifies the directory to save results to instead of the default
+- `--detect_boxes` specifies if cells should be detected.  By default, they're pulled out of the PDF, but this is not always possible. 
+- `--skip_table_detection` tells table recognition not to detect tables first.  Use this if your image is already cropped to a table.
+
+The `results.json` file will contain a json dictionary where the keys are the input filenames without extensions.  Each value will be a list of dictionaries, one per page of the input document.  Each page dictionary contains:
+
+- `rows` - detected table rows
+  - `bbox` - the bounding box of the table row
+  - `row_id` - the id of the row
+- `cols` - detected table columns
+  - `bbox` - the bounding box of the table column
+  - `col_id`- the id of the column
+- `cells` - detected table cells
+  - `bbox` - the axis-aligned rectangle for the text line in (x1, y1, x2, y2) format.  (x1, y1) is the top left corner, and (x2, y2) is the bottom right corner.
+  - `text` - if text could be pulled out of the pdf, the text of this cell.
+- `page` - the page number in the file
+- `table_idx` - the index of the table on the page (sorted in vertical order)
+- `image_bbox` - the bbox for the image in (x1, y1, x2, y2) format.  (x1, y1) is the top left corner, and (x2, y2) is the bottom right corner.  All line bboxes will be contained within this bbox.
+
+**Performance tips**
+
+Setting the `TABLE_REC_BATCH_SIZE` env var properly will make a big difference when using a GPU.  Each batch item will use `150MB` of VRAM, so very high batch sizes are possible.  The default is a batch size `64`, which will use about 10GB of VRAM.  Depending on your CPU core count, it might help, too - the default CPU batch size is `8`.
+
 
 # Limitations
 
 - This is specialized for document OCR.  It will likely not work on photos or other images.
-- Surya is for OCR - the goal is to recognize the text lines correctly, not sort them into reading order. Surya will attempt to sort the lines, which will work in many cases, but use something like [marker](https://github.com/VikParuchuri/marker) or other postprocessing if you need to order the text.
 - It is for printed text, not handwriting (though it may work on some handwriting).
-- The model has trained itself to ignore advertisements.
-- You can find language support for OCR in `surya/languages.py`.  Text detection should work with any language.
+- The text detection model has trained itself to ignore advertisements.
+- You can find language support for OCR in `surya/languages.py`.  Text detection, layout analysis, and reading order will work with any language.
 
 ## Troubleshooting
 
@@ -166,7 +328,6 @@ If OCR isn't working properly:
 - Try increasing resolution of the image so the text is bigger.  If the resolution is already very high, try decreasing it to no more than a `2048px` width.
 - Preprocessing the image (binarizing, deskewing, etc) can help with very old/blurry images.
 - You can adjust `DETECTOR_BLANK_THRESHOLD` and `DETECTOR_TEXT_THRESHOLD` if you don't get good results.  `DETECTOR_BLANK_THRESHOLD` controls the space between lines - any prediction below this number will be considered blank space.  `DETECTOR_TEXT_THRESHOLD` controls how text is joined - any number above this is considered text.  `DETECTOR_TEXT_THRESHOLD` should always be higher than `DETECTOR_BLANK_THRESHOLD`, and both should be in the 0-1 range.  Looking at the heatmap from the debug output of the detector can tell you how to adjust these (if you see faint things that look like boxes, lower the thresholds, and if you see bboxes being joined together, raise the thresholds).
-
 
 # Manual install
 
@@ -181,7 +342,7 @@ If you want to develop surya, you can install it manually:
 
 ## OCR
 
-![Benchmark chart](static/images/benchmark_rec_chart.png)
+![Benchmark chart tesseract](static/images/benchmark_rec_chart.png)
 
 | Model     | Time per page (s) | Avg similarity (⬆) |
 |-----------|-------------------|--------------------|
@@ -192,26 +353,36 @@ If you want to develop surya, you can install it manually:
 
 Tesseract is CPU-based, and surya is CPU or GPU.  I tried to cost-match the resources used, so I used a 1xA6000 (48GB VRAM) for surya, and 28 CPU cores for Tesseract (same price on Lambda Labs/DigitalOcean).
 
+### Google Cloud Vision
+
+I benchmarked OCR against Google Cloud vision since it has similar language coverage to Surya.
+
+![Benchmark chart google cloud](static/images/gcloud_rec_bench.png)
+
+[Full language results](static/images/gcloud_full_langs.png)
+
 **Methodology**
 
 I measured normalized sentence similarity (0-1, higher is better) based on a set of real-world and synthetic pdfs.  I sampled PDFs from common crawl, then filtered out the ones with bad OCR.  I couldn't find PDFs for some languages, so I also generated simple synthetic PDFs for those.
 
 I used the reference line bboxes from the PDFs with both tesseract and surya, to just evaluate the OCR quality.
 
+For Google Cloud, I aligned the output from Google Cloud with the ground truth.  I had to skip RTL languages since they didn't align well.
+
 ## Text line detection
 
 ![Benchmark chart](static/images/benchmark_chart_small.png)
 
-| Model     |   Time (s) |   Time per page (s) |   precision |   recall |
+| Model     | Time (s)   | Time per page (s)   | precision   |   recall |
 |-----------|------------|---------------------|-------------|----------|
-| surya     |    52.6892 |            0.205817 |    0.844426 | 0.937818 |
-| tesseract |    74.4546 |            0.290838 |    0.631498 | 0.997694 |
+| surya     | 50.2099    | 0.196133            | 0.821061    | 0.956556 |
+| tesseract | 74.4546    | 0.290838            | 0.631498    | 0.997694 |
 
 
-Tesseract is CPU-based, and surya is CPU or GPU.  I ran the benchmarks on a system with an A6000 GPU, and a 32 core CPU.  This was the resource usage:
+Tesseract is CPU-based, and surya is CPU or GPU.  I ran the benchmarks on a system with an A10 GPU, and a 32 core CPU.  This was the resource usage:
 
 - tesseract - 32 CPU cores, or 8 workers using 4 cores each
-- surya - 32 batch size, for 9GB VRAM usage
+- surya - 36 batch size, for 16GB VRAM usage
 
 **Methodology**
 
@@ -226,6 +397,49 @@ First calculate coverage for each bbox, then add a small penalty for double cove
 
 Then we calculate precision and recall for the whole dataset.
 
+## Layout analysis
+
+![Benchmark chart](static/images/benchmark_layout_chart.png)
+
+| Layout Type | precision | recall |
+| ----------- | --------- | ------ |
+| Image       | 0.97      | 0.96   |
+| Table       | 0.99      | 0.99   |
+| Text        | 0.9       | 0.97   |
+| Title       | 0.94      | 0.88   |
+
+Time per image - .4 seconds on GPU (A10).
+
+**Methodology**
+
+I benchmarked the layout analysis on [Publaynet](https://github.com/ibm-aur-nlp/PubLayNet), which was not in the training data.  I had to align publaynet labels with the surya layout labels.  I was then able to find coverage for each layout type:
+
+- Precision - how well the predicted bboxes cover ground truth bboxes
+- Recall - how well ground truth bboxes cover predicted bboxes
+
+## Reading Order
+
+75% mean accuracy, and .14 seconds per image on an A6000 GPU.  See methodology for notes - this benchmark is not perfect measure of accuracy, and is more useful as a sanity check.
+
+**Methodology**
+
+I benchmarked the reading order on the layout dataset from [here](https://www.icst.pku.edu.cn/cpdp/sjzy/), which was not in the training data.  Unfortunately, this dataset is fairly noisy, and not all the labels are correct.  It was very hard to find a dataset annotated with reading order and also layout information.  I wanted to avoid using a cloud service for the ground truth.
+
+The accuracy is computed by finding if each pair of layout boxes is in the correct order, then taking the % that are correct.
+
+## Table Recognition
+
+| Model             | Row Intersection | Col Intersection |   Time Per Image |
+|-------------------|------------------|------------------|------------------|
+| Surya             | 0.97             | 0.93             |             0.03 |
+| Table transformer | 0.72             | 0.84             |             0.02 |
+
+Higher is better for intersection, which the percentage of the actual row/column overlapped by the predictions.
+
+**Methodology**
+
+The benchmark uses a subset of [Fintabnet](https://developer.ibm.com/exchanges/data/all/fintabnet/) from IBM.  It has labeled rows and columns.  After table recognition is run, the predicted rows and columns are compared to the ground truth.  There is an additional penalty for predicting too many or too few rows/columns.
+
 ## Running your own benchmarks
 
 You can benchmark the performance of surya on your machine.  
@@ -237,7 +451,7 @@ You can benchmark the performance of surya on your machine.
 
 This will evaluate tesseract and surya for text line detection across a randomly sampled set of images from [doclaynet](https://huggingface.co/datasets/vikp/doclaynet_bench).
 
-```
+```shell
 python benchmark/detection.py --max 256
 ```
 
@@ -250,7 +464,7 @@ python benchmark/detection.py --max 256
 
 This will evaluate surya and optionally tesseract on multilingual pdfs from common crawl (with synthetic data for missing languages).
 
-```
+```shell
 python benchmark/recognition.py --tesseract
 ```
 
@@ -258,26 +472,56 @@ python benchmark/recognition.py --tesseract
 - `--debug 2` will render images with detected text
 - `--results_dir` will let you specify a directory to save results to instead of the default one
 - `--tesseract` will run the benchmark with tesseract.  You have to run `sudo apt-get install tesseract-ocr-all` to install all tesseract data, and set `TESSDATA_PREFIX` to the path to the tesseract data folder.
-- Set `RECOGNITION_BATCH_SIZE=864` to use the same batch size as the benchmark.
 
+- Set `RECOGNITION_BATCH_SIZE=864` to use the same batch size as the benchmark.
+- Set `RECOGNITION_BENCH_DATASET_NAME=vikp/rec_bench_hist` to use the historical document data for benchmarking.  This data comes from the [tapuscorpus](https://github.com/HTR-United/tapuscorpus).
+
+**Layout analysis**
+
+This will evaluate surya on the publaynet dataset.
+
+```shell
+python benchmark/layout.py
+```
+
+- `--max` controls how many images to process for the benchmark
+- `--debug` will render images with detected text
+- `--results_dir` will let you specify a directory to save results to instead of the default one
+
+**Reading Order**
+
+```shell
+python benchmark/ordering.py
+```
+
+- `--max` controls how many images to process for the benchmark
+- `--debug` will render images with detected text
+- `--results_dir` will let you specify a directory to save results to instead of the default one
+
+**Table Recognition**
+
+```shell
+python benchmark/table_recognition.py --max 1024 --tatr
+```
+
+- `--max` controls how many images to process for the benchmark
+- `--debug` will render images with detected text
+- `--results_dir` will let you specify a directory to save results to instead of the default one
+- `--tatr` specifies whether to also run table transformer
 
 # Training
 
-Text detection was trained on 4x A6000s for 3 days.  It used a diverse set of images as training data.  It was trained from scratch using a modified segformer architecture that reduces inference RAM requirements.
+Text detection was trained on 4x A6000s for 3 days.  It used a diverse set of images as training data.  It was trained from scratch using a modified efficientvit architecture for semantic segmentation.
 
 Text recognition was trained on 4x A6000s for 2 weeks.  It was trained using a modified donut model (GQA, MoE layer, UTF-16 decoding, layer config changes).
-
-# Commercial usage
-
-The text detection and OCR models were trained from scratch, so they're okay for commercial usage.  The weights are licensed cc-by-nc-sa-4.0, but I will waive that for any organization under $5M USD in gross revenue in the most recent 12-month period.
-
-If you want to remove the GPL license requirements for inference or use the weights commercially over the revenue limit, please contact me at surya@vikas.sh for dual licensing.
 
 # Thanks
 
 This work would not have been possible without amazing open source AI work:
 
 - [Segformer](https://arxiv.org/pdf/2105.15203.pdf) from NVIDIA
+- [EfficientViT](https://github.com/mit-han-lab/efficientvit) from MIT
+- [timm](https://github.com/huggingface/pytorch-image-models) from Ross Wightman
 - [Donut](https://github.com/clovaai/donut) from Naver
 - [transformers](https://github.com/huggingface/transformers) from huggingface
 - [CRAFT](https://github.com/clovaai/CRAFT-pytorch), a great scene text detection model

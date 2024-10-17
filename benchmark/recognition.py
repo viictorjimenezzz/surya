@@ -1,7 +1,10 @@
 import argparse
 from collections import defaultdict
 
+import torch
+
 from benchmark.scoring import overlap_score
+from surya.input.processing import convert_if_not_rgb
 from surya.model.recognition.model import load_model as load_recognition_model
 from surya.model.recognition.processor import load_processor as load_recognition_processor
 from surya.ocr import run_recognition
@@ -26,7 +29,12 @@ def main():
     parser.add_argument("--tesseract", action="store_true", help="Run tesseract instead of surya.", default=False)
     parser.add_argument("--langs", type=str, help="Specify certain languages to benchmark.", default=None)
     parser.add_argument("--tess_cpus", type=int, help="Number of CPUs to use for tesseract.", default=28)
+    parser.add_argument("--compile", action="store_true", help="Compile the model.", default=False)
+    parser.add_argument("--specify_language", action="store_true", help="Pass language codes into the model.", default=False)
     args = parser.parse_args()
+
+    if args.compile:
+        assert settings.RECOGNITION_STATIC_CACHE, "You must set RECOGNITION_STATIC_CACHE to compile the model."
 
     rec_model = load_recognition_model()
     rec_processor = load_recognition_processor()
@@ -39,10 +47,10 @@ def main():
 
     if args.langs:
         langs = args.langs.split(",")
-        dataset = dataset.filter(lambda x: x["language"] in langs)
+        dataset = dataset.filter(lambda x: x["language"] in langs, num_proc=4)
 
     images = list(dataset["image"])
-    images = [i.convert("RGB") for i in images]
+    images = convert_if_not_rgb(images)
     bboxes = list(dataset["bboxes"])
     line_text = list(dataset["text"])
     languages = list(dataset["language"])
@@ -55,9 +63,17 @@ def main():
             lang_list.append([l])
         else:
             lang_list.append(l)
+    n_list = [None] * len(images)
+
+    if args.compile:
+        torch.set_float32_matmul_precision('high')
+        torch._dynamo.config.cache_size_limit = 64
+        rec_model.decoder.model = torch.compile(rec_model.decoder.model)
+        # Run through one batch to compile the model
+        run_recognition(images[:1], lang_list[:1], rec_model, rec_processor, bboxes=bboxes[:1])
 
     start = time.time()
-    predictions_by_image = run_recognition(images, lang_list, rec_model, rec_processor, bboxes=bboxes)
+    predictions_by_image = run_recognition(images, lang_list if args.specify_language else n_list, rec_model, rec_processor, bboxes=bboxes)
     surya_time = time.time() - start
 
     surya_scores = defaultdict(list)
@@ -72,9 +88,9 @@ def main():
     flat_surya_scores = [s for l in surya_scores for s in surya_scores[l]]
     benchmark_stats = {
         "surya": {
-            "avg_score": sum(flat_surya_scores) / len(flat_surya_scores),
-            "lang_scores": {l: sum(scores) / len(scores) for l, scores in surya_scores.items()},
-            "time_per_img": surya_time / len(images)
+            "avg_score": sum(flat_surya_scores) / max(1, len(flat_surya_scores)),
+            "lang_scores": {l: sum(scores) / max(1, len(scores)) for l, scores in surya_scores.items()},
+            "time_per_img": surya_time / max(1, len(images))
         }
     }
 
@@ -122,7 +138,7 @@ def main():
         json.dump(benchmark_stats, f)
 
     key_languages = [k for k in KEY_LANGUAGES if k in surya_scores]
-    table_headers = ["Model", "Time per page (s)", "Avg Score"] + KEY_LANGUAGES
+    table_headers = ["Model", "Time per page (s)", "Avg Score"] + key_languages
     table_data = [
         ["surya", benchmark_stats["surya"]["time_per_img"], benchmark_stats["surya"]["avg_score"]] + [benchmark_stats["surya"]["lang_scores"][l] for l in key_languages],
     ]
@@ -148,9 +164,9 @@ def main():
             pred_image_name = f"{'_'.join(lang)}_{idx}_pred.png"
             ref_image_name = f"{'_'.join(lang)}_{idx}_ref.png"
             pred_text = [l.text for l in pred.text_lines]
-            pred_image = draw_text_on_image(bbox, pred_text, image.size)
+            pred_image = draw_text_on_image(bbox, pred_text, image.size, lang)
             pred_image.save(os.path.join(result_path, pred_image_name))
-            ref_image = draw_text_on_image(bbox, ref_text, image.size)
+            ref_image = draw_text_on_image(bbox, ref_text, image.size, lang)
             ref_image.save(os.path.join(result_path, ref_image_name))
             image.save(os.path.join(result_path, f"{'_'.join(lang)}_{idx}_image.png"))
 
