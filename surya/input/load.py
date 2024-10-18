@@ -28,17 +28,18 @@ def load_pdf(pdf_path, max_pages=None, start_page=None, dpi=settings.IMAGE_DPI, 
 
     page_indices = list(range(start_page, last_page))
     images = get_page_images(doc, page_indices, dpi=dpi)
-    text_lines = None
-    if load_text_lines:
-        from surya.input.pdflines import get_page_text_lines # Putting import here because pypdfium2 causes warnings if its not the top import
-        text_lines = get_page_text_lines(
-            pdf_path,
-            page_indices,
-            [i.size for i in images]
-        )
-    doc.close()
-    names = [get_name_from_path(pdf_path) for _ in page_indices]
-    return images, names, text_lines
+    # text_lines = None
+    # if load_text_lines:
+    #     from surya.input.pdflines import get_page_text_lines # Putting import here because pypdfium2 causes warnings if its not the top import
+    #     text_lines = get_page_text_lines(
+    #         pdf_path,
+    #         page_indices,
+    #         [i.size for i in images]
+    #     )
+    # doc.close()
+    # names = [get_name_from_path(pdf_path) for _ in page_indices]
+    # return images, names, text_lines
+    return images, None
 
 
 def load_image(image_path):
