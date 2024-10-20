@@ -40,7 +40,7 @@ def surya_detect(
         images, names = load_from_file(input_path, max_pages)
         # folder_name = os.path.basename(input_path).split(".")[0]
 
-    predictions = batch_detection(images, model, processor)
+    predictions = batch_text_detection(images, model, processor)
     # result_path = os.path.join(results_dir, folder_name)
     # os.makedirs(result_path, exist_ok=True)
 
